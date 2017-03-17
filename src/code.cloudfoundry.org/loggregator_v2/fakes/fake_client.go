@@ -3,6 +3,7 @@ package fakes
 
 import (
 	"sync"
+	"time"
 
 	"code.cloudfoundry.org/loggregator_v2"
 	"github.com/cloudfoundry/sonde-go/events"
@@ -37,6 +38,51 @@ type FakeClient struct {
 		metrics *events.ContainerMetric
 	}
 	sendAppMetricsReturns struct {
+		result1 error
+	}
+	SendDurationStub        func(name string, value time.Duration) error
+	sendDurationMutex       sync.RWMutex
+	sendDurationArgsForCall []struct {
+		name  string
+		value time.Duration
+	}
+	sendDurationReturns struct {
+		result1 error
+	}
+	SendMebiBytesStub        func(name string, value int) error
+	sendMebiBytesMutex       sync.RWMutex
+	sendMebiBytesArgsForCall []struct {
+		name  string
+		value int
+	}
+	sendMebiBytesReturns struct {
+		result1 error
+	}
+	SendMetricStub        func(name string, value int) error
+	sendMetricMutex       sync.RWMutex
+	sendMetricArgsForCall []struct {
+		name  string
+		value int
+	}
+	sendMetricReturns struct {
+		result1 error
+	}
+	SendBytesPerSecondStub        func(name string, value float64) error
+	sendBytesPerSecondMutex       sync.RWMutex
+	sendBytesPerSecondArgsForCall []struct {
+		name  string
+		value float64
+	}
+	sendBytesPerSecondReturns struct {
+		result1 error
+	}
+	SendRequestsPerSecondStub        func(name string, value float64) error
+	sendRequestsPerSecondMutex       sync.RWMutex
+	sendRequestsPerSecondArgsForCall []struct {
+		name  string
+		value float64
+	}
+	sendRequestsPerSecondReturns struct {
 		result1 error
 	}
 	invocations      map[string][][]interface{}
@@ -148,6 +194,176 @@ func (fake *FakeClient) SendAppMetricsReturns(result1 error) {
 	}{result1}
 }
 
+func (fake *FakeClient) SendDuration(name string, value time.Duration) error {
+	fake.sendDurationMutex.Lock()
+	fake.sendDurationArgsForCall = append(fake.sendDurationArgsForCall, struct {
+		name  string
+		value time.Duration
+	}{name, value})
+	fake.recordInvocation("SendDuration", []interface{}{name, value})
+	fake.sendDurationMutex.Unlock()
+	if fake.SendDurationStub != nil {
+		return fake.SendDurationStub(name, value)
+	} else {
+		return fake.sendDurationReturns.result1
+	}
+}
+
+func (fake *FakeClient) SendDurationCallCount() int {
+	fake.sendDurationMutex.RLock()
+	defer fake.sendDurationMutex.RUnlock()
+	return len(fake.sendDurationArgsForCall)
+}
+
+func (fake *FakeClient) SendDurationArgsForCall(i int) (string, time.Duration) {
+	fake.sendDurationMutex.RLock()
+	defer fake.sendDurationMutex.RUnlock()
+	return fake.sendDurationArgsForCall[i].name, fake.sendDurationArgsForCall[i].value
+}
+
+func (fake *FakeClient) SendDurationReturns(result1 error) {
+	fake.SendDurationStub = nil
+	fake.sendDurationReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeClient) SendMebiBytes(name string, value int) error {
+	fake.sendMebiBytesMutex.Lock()
+	fake.sendMebiBytesArgsForCall = append(fake.sendMebiBytesArgsForCall, struct {
+		name  string
+		value int
+	}{name, value})
+	fake.recordInvocation("SendMebiBytes", []interface{}{name, value})
+	fake.sendMebiBytesMutex.Unlock()
+	if fake.SendMebiBytesStub != nil {
+		return fake.SendMebiBytesStub(name, value)
+	} else {
+		return fake.sendMebiBytesReturns.result1
+	}
+}
+
+func (fake *FakeClient) SendMebiBytesCallCount() int {
+	fake.sendMebiBytesMutex.RLock()
+	defer fake.sendMebiBytesMutex.RUnlock()
+	return len(fake.sendMebiBytesArgsForCall)
+}
+
+func (fake *FakeClient) SendMebiBytesArgsForCall(i int) (string, int) {
+	fake.sendMebiBytesMutex.RLock()
+	defer fake.sendMebiBytesMutex.RUnlock()
+	return fake.sendMebiBytesArgsForCall[i].name, fake.sendMebiBytesArgsForCall[i].value
+}
+
+func (fake *FakeClient) SendMebiBytesReturns(result1 error) {
+	fake.SendMebiBytesStub = nil
+	fake.sendMebiBytesReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeClient) SendMetric(name string, value int) error {
+	fake.sendMetricMutex.Lock()
+	fake.sendMetricArgsForCall = append(fake.sendMetricArgsForCall, struct {
+		name  string
+		value int
+	}{name, value})
+	fake.recordInvocation("SendMetric", []interface{}{name, value})
+	fake.sendMetricMutex.Unlock()
+	if fake.SendMetricStub != nil {
+		return fake.SendMetricStub(name, value)
+	} else {
+		return fake.sendMetricReturns.result1
+	}
+}
+
+func (fake *FakeClient) SendMetricCallCount() int {
+	fake.sendMetricMutex.RLock()
+	defer fake.sendMetricMutex.RUnlock()
+	return len(fake.sendMetricArgsForCall)
+}
+
+func (fake *FakeClient) SendMetricArgsForCall(i int) (string, int) {
+	fake.sendMetricMutex.RLock()
+	defer fake.sendMetricMutex.RUnlock()
+	return fake.sendMetricArgsForCall[i].name, fake.sendMetricArgsForCall[i].value
+}
+
+func (fake *FakeClient) SendMetricReturns(result1 error) {
+	fake.SendMetricStub = nil
+	fake.sendMetricReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeClient) SendBytesPerSecond(name string, value float64) error {
+	fake.sendBytesPerSecondMutex.Lock()
+	fake.sendBytesPerSecondArgsForCall = append(fake.sendBytesPerSecondArgsForCall, struct {
+		name  string
+		value float64
+	}{name, value})
+	fake.recordInvocation("SendBytesPerSecond", []interface{}{name, value})
+	fake.sendBytesPerSecondMutex.Unlock()
+	if fake.SendBytesPerSecondStub != nil {
+		return fake.SendBytesPerSecondStub(name, value)
+	} else {
+		return fake.sendBytesPerSecondReturns.result1
+	}
+}
+
+func (fake *FakeClient) SendBytesPerSecondCallCount() int {
+	fake.sendBytesPerSecondMutex.RLock()
+	defer fake.sendBytesPerSecondMutex.RUnlock()
+	return len(fake.sendBytesPerSecondArgsForCall)
+}
+
+func (fake *FakeClient) SendBytesPerSecondArgsForCall(i int) (string, float64) {
+	fake.sendBytesPerSecondMutex.RLock()
+	defer fake.sendBytesPerSecondMutex.RUnlock()
+	return fake.sendBytesPerSecondArgsForCall[i].name, fake.sendBytesPerSecondArgsForCall[i].value
+}
+
+func (fake *FakeClient) SendBytesPerSecondReturns(result1 error) {
+	fake.SendBytesPerSecondStub = nil
+	fake.sendBytesPerSecondReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeClient) SendRequestsPerSecond(name string, value float64) error {
+	fake.sendRequestsPerSecondMutex.Lock()
+	fake.sendRequestsPerSecondArgsForCall = append(fake.sendRequestsPerSecondArgsForCall, struct {
+		name  string
+		value float64
+	}{name, value})
+	fake.recordInvocation("SendRequestsPerSecond", []interface{}{name, value})
+	fake.sendRequestsPerSecondMutex.Unlock()
+	if fake.SendRequestsPerSecondStub != nil {
+		return fake.SendRequestsPerSecondStub(name, value)
+	} else {
+		return fake.sendRequestsPerSecondReturns.result1
+	}
+}
+
+func (fake *FakeClient) SendRequestsPerSecondCallCount() int {
+	fake.sendRequestsPerSecondMutex.RLock()
+	defer fake.sendRequestsPerSecondMutex.RUnlock()
+	return len(fake.sendRequestsPerSecondArgsForCall)
+}
+
+func (fake *FakeClient) SendRequestsPerSecondArgsForCall(i int) (string, float64) {
+	fake.sendRequestsPerSecondMutex.RLock()
+	defer fake.sendRequestsPerSecondMutex.RUnlock()
+	return fake.sendRequestsPerSecondArgsForCall[i].name, fake.sendRequestsPerSecondArgsForCall[i].value
+}
+
+func (fake *FakeClient) SendRequestsPerSecondReturns(result1 error) {
+	fake.SendRequestsPerSecondStub = nil
+	fake.sendRequestsPerSecondReturns = struct {
+		result1 error
+	}{result1}
+}
+
 func (fake *FakeClient) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
@@ -157,6 +373,16 @@ func (fake *FakeClient) Invocations() map[string][][]interface{} {
 	defer fake.sendAppErrorLogMutex.RUnlock()
 	fake.sendAppMetricsMutex.RLock()
 	defer fake.sendAppMetricsMutex.RUnlock()
+	fake.sendDurationMutex.RLock()
+	defer fake.sendDurationMutex.RUnlock()
+	fake.sendMebiBytesMutex.RLock()
+	defer fake.sendMebiBytesMutex.RUnlock()
+	fake.sendMetricMutex.RLock()
+	defer fake.sendMetricMutex.RUnlock()
+	fake.sendBytesPerSecondMutex.RLock()
+	defer fake.sendBytesPerSecondMutex.RUnlock()
+	fake.sendRequestsPerSecondMutex.RLock()
+	defer fake.sendRequestsPerSecondMutex.RUnlock()
 	return fake.invocations
 }
 

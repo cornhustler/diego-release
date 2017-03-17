@@ -144,3 +144,38 @@ func (c *grpcClient) SendAppMetrics(m *events.ContainerMetric) error {
 	c.addEnvelopeTags(env)
 	return c.send(env)
 }
+
+func (c *grpcClient) SendDuration(name string, duration time.Duration) error {
+	return c.sendComponentMetric(name, float64(duration), "nanos")
+}
+
+func (c *grpcClient) SendMebiBytes(name string, mebibytes int) error {
+	return c.sendComponentMetric(name, float64(mebibytes), "MiB")
+}
+
+func (c *grpcClient) SendMetric(name string, value int) error {
+	return c.sendComponentMetric(name, float64(value), "Metric")
+}
+
+func (c *grpcClient) SendBytesPerSecond(name string, value float64) error {
+	return c.sendComponentMetric(name, value, "B/s")
+}
+
+func (c *grpcClient) SendRequestsPerSecond(name string, value float64) error {
+	return c.sendComponentMetric(name, value, "Req/s")
+}
+
+func (c *grpcClient) sendComponentMetric(name string, value float64, unit string) error {
+	env := &Envelope{
+		Timestamp: time.Now().UnixNano(),
+		// SourceId:  m.GetApplicationId(),
+		Message: &Envelope_Gauge{
+			Gauge: &Gauge{
+				Metrics: map[string]*GaugeValue{
+					name: &GaugeValue{Value: value, Unit: unit},
+				},
+			},
+		},
+	}
+	return c.send(env)
+}

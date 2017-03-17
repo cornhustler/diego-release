@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"time"
 
 	"code.cloudfoundry.org/lager"
 
@@ -18,10 +19,19 @@ import (
 
 //go:generate counterfeiter -o fakes/fake_client.go . Client
 
+type ComponentClient interface {
+	SendDuration(name string, value time.Duration) error
+	SendMebiBytes(name string, value int) error
+	SendMetric(name string, value int) error
+	SendBytesPerSecond(name string, value float64) error
+	SendRequestsPerSecond(name string, value float64) error
+}
+
 type Client interface {
 	SendAppLog(appID, message, sourceType, sourceInstance string) error
 	SendAppErrorLog(appID, message, sourceType, sourceInstance string) error
 	SendAppMetrics(metrics *events.ContainerMetric) error
+	ComponentClient
 }
 
 type MetronConfig struct {
