@@ -44,7 +44,7 @@ var _ = Describe("Client", func() {
 
 		BeforeEach(func() {
 			logSender = &lfake.FakeLogSender{}
-			metricSender = &mfake.FakeMetricSender{}
+			metricSender = mfake.NewFakeMetricSender()
 			config.UseV2API = false
 			logs.Initialize(logSender)
 			metrics.Initialize(metricSender, nil)
@@ -68,6 +68,36 @@ var _ = Describe("Client", func() {
 			}
 			client.SendAppMetrics(&metric)
 			Expect(metricSender.Events()).To(ConsistOf(&metric))
+		})
+
+		It("sends component duration", func() {
+			client.SendDuration("test-name", 1*time.Nanosecond)
+			Expect(metricSender.HasValue("test-name")).To(BeTrue())
+			Expect(metricSender.GetValue("test-name")).To(Equal(mfake.Metric{Value: 1, Unit: "nanos"}))
+		})
+
+		It("sends component data in MebiBytes", func() {
+			client.SendMebiBytes("test-name", 100)
+			Expect(metricSender.HasValue("test-name")).To(BeTrue())
+			Expect(metricSender.GetValue("test-name")).To(Equal(mfake.Metric{Value: 100, Unit: "MiB"}))
+		})
+
+		It("sends component metric", func() {
+			client.SendMetric("test-name", 1)
+			Expect(metricSender.HasValue("test-name")).To(BeTrue())
+			Expect(metricSender.GetValue("test-name")).To(Equal(mfake.Metric{Value: 1, Unit: "Metric"}))
+		})
+
+		It("sends component bytes/sec", func() {
+			client.SendBytesPerSecond("test-name", 100.1)
+			Expect(metricSender.HasValue("test-name")).To(BeTrue())
+			Expect(metricSender.GetValue("test-name")).To(Equal(mfake.Metric{Value: 100.1, Unit: "B/s"}))
+		})
+
+		It("sends component req/sec", func() {
+			client.SendRequestsPerSecond("test-name", 100.1)
+			Expect(metricSender.HasValue("test-name")).To(BeTrue())
+			Expect(metricSender.GetValue("test-name")).To(Equal(mfake.Metric{Value: 100.1, Unit: "Req/s"}))
 		})
 	})
 
@@ -241,6 +271,93 @@ var _ = Describe("Client", func() {
 				Expect(metrics.GetMetrics()["disk"].GetValue()).To(Equal(10.0))
 				Expect(metrics.GetMetrics()["memory_quota"].GetValue()).To(Equal(20.0))
 				Expect(metrics.GetMetrics()["disk_quota"].GetValue()).To(Equal(20.0))
+			})
+
+			FContext("when component metrics are emitted", func() {
+				It("sends duration info", func() {
+					Consistently(func() error {
+						return client.SendDuration("test-name", 1*time.Nanosecond)
+					}).Should(Succeed())
+					var recv loggregator_v2.Ingress_SenderServer
+					Eventually(receivers).Should(Receive(&recv))
+					env, err := recv.Recv()
+					Expect(err).NotTo(HaveOccurred())
+
+					ts := time.Unix(0, env.GetTimestamp())
+					Expect(ts).Should(BeTemporally("~", time.Now(), time.Second))
+					message := env.GetGauge()
+					Expect(message).NotTo(BeNil())
+					Expect(message.GetMetrics()["test-name"].GetValue()).To(Equal(float64(1)))
+					Expect(message.GetMetrics()["test-name"].GetUnit()).To(Equal("nanos"))
+				})
+
+				It("sends mebibytes info", func() {
+					Consistently(func() error {
+						return client.SendMebiBytes("test-name", 10)
+					}).Should(Succeed())
+					var recv loggregator_v2.Ingress_SenderServer
+					Eventually(receivers).Should(Receive(&recv))
+					env, err := recv.Recv()
+					Expect(err).NotTo(HaveOccurred())
+
+					ts := time.Unix(0, env.GetTimestamp())
+					Expect(ts).Should(BeTemporally("~", time.Now(), time.Second))
+					message := env.GetGauge()
+					Expect(message).NotTo(BeNil())
+					Expect(message.GetMetrics()["test-name"].GetValue()).To(Equal(float64(10)))
+					Expect(message.GetMetrics()["test-name"].GetUnit()).To(Equal("MiB"))
+				})
+
+				It("sends metrics info", func() {
+					Consistently(func() error {
+						return client.SendMetric("test-name", 11)
+					}).Should(Succeed())
+					var recv loggregator_v2.Ingress_SenderServer
+					Eventually(receivers).Should(Receive(&recv))
+					env, err := recv.Recv()
+					Expect(err).NotTo(HaveOccurred())
+
+					ts := time.Unix(0, env.GetTimestamp())
+					Expect(ts).Should(BeTemporally("~", time.Now(), time.Second))
+					message := env.GetGauge()
+					Expect(message).NotTo(BeNil())
+					Expect(message.GetMetrics()["test-name"].GetValue()).To(Equal(float64(11)))
+					Expect(message.GetMetrics()["test-name"].GetUnit()).To(Equal("Metric"))
+				})
+
+				It("sends requests per second info", func() {
+					Consistently(func() error {
+						return client.SendRequestsPerSecond("test-name", 11)
+					}).Should(Succeed())
+					var recv loggregator_v2.Ingress_SenderServer
+					Eventually(receivers).Should(Receive(&recv))
+					env, err := recv.Recv()
+					Expect(err).NotTo(HaveOccurred())
+
+					ts := time.Unix(0, env.GetTimestamp())
+					Expect(ts).Should(BeTemporally("~", time.Now(), time.Second))
+					message := env.GetGauge()
+					Expect(message).NotTo(BeNil())
+					Expect(message.GetMetrics()["test-name"].GetValue()).To(Equal(float64(11)))
+					Expect(message.GetMetrics()["test-name"].GetUnit()).To(Equal("Req/s"))
+				})
+
+				It("sends bytes per second info", func() {
+					Consistently(func() error {
+						return client.SendBytesPerSecond("test-name", 10)
+					}).Should(Succeed())
+					var recv loggregator_v2.Ingress_SenderServer
+					Eventually(receivers).Should(Receive(&recv))
+					env, err := recv.Recv()
+					Expect(err).NotTo(HaveOccurred())
+
+					ts := time.Unix(0, env.GetTimestamp())
+					Expect(ts).Should(BeTemporally("~", time.Now(), time.Second))
+					message := env.GetGauge()
+					Expect(message).NotTo(BeNil())
+					Expect(message.GetMetrics()["test-name"].GetValue()).To(Equal(float64(10)))
+					Expect(message.GetMetrics()["test-name"].GetUnit()).To(Equal("B/s"))
+				})
 			})
 
 			Context("when the server goes away and comes back", func() {

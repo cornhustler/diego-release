@@ -168,7 +168,6 @@ func (c *grpcClient) SendRequestsPerSecond(name string, value float64) error {
 func (c *grpcClient) sendComponentMetric(name string, value float64, unit string) error {
 	env := &Envelope{
 		Timestamp: time.Now().UnixNano(),
-		// SourceId:  m.GetApplicationId(),
 		Message: &Envelope_Gauge{
 			Gauge: &Gauge{
 				Metrics: map[string]*GaugeValue{
