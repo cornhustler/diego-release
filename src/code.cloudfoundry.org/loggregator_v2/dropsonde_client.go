@@ -10,6 +10,9 @@ import (
 
 type dropsondeClient struct{}
 
+func (c *dropsondeClient) IncrementCounter(name string) error {
+	return metrics.IncrementCounter(name)
+}
 func (c *dropsondeClient) SendAppLog(appID, message, sourceType, sourceInstance string) error {
 	return logs.SendAppLog(appID, message, sourceType, sourceInstance)
 }

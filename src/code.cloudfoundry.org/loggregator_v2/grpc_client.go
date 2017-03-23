@@ -165,6 +165,21 @@ func (c *grpcClient) SendRequestsPerSecond(name string, value float64) error {
 	return c.sendComponentMetric(name, value, "Req/s")
 }
 
+func (c *grpcClient) IncrementCounter(name string) error {
+	env := &Envelope{
+		Timestamp: time.Now().UnixNano(),
+		Message: &Envelope_Counter{
+			Counter: &Counter{
+				Name: name,
+				Value: &Counter_Delta{
+					Delta: uint64(1),
+				},
+			},
+		},
+	}
+	return c.send(env)
+}
+
 func (c *grpcClient) sendComponentMetric(name string, value float64, unit string) error {
 	env := &Envelope{
 		Timestamp: time.Now().UnixNano(),

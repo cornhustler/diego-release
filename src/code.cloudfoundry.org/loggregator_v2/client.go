@@ -20,6 +20,7 @@ import (
 //go:generate counterfeiter -o fakes/fake_client.go . Client
 
 type ComponentClient interface {
+	IncrementCounter(name string) error
 	SendDuration(name string, value time.Duration) error
 	SendMebiBytes(name string, value int) error
 	SendMetric(name string, value int) error

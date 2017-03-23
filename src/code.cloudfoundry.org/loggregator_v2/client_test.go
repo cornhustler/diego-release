@@ -273,7 +273,7 @@ var _ = Describe("Client", func() {
 				Expect(metrics.GetMetrics()["disk_quota"].GetValue()).To(Equal(20.0))
 			})
 
-			FContext("when component metrics are emitted", func() {
+			Context("when component metrics are emitted", func() {
 				It("sends duration info", func() {
 					Consistently(func() error {
 						return client.SendDuration("test-name", 1*time.Nanosecond)
@@ -339,7 +339,6 @@ var _ = Describe("Client", func() {
 					message := env.GetGauge()
 					Expect(message).NotTo(BeNil())
 					Expect(message.GetMetrics()["test-name"].GetValue()).To(Equal(float64(11)))
-					Expect(message.GetMetrics()["test-name"].GetUnit()).To(Equal("Req/s"))
 				})
 
 				It("sends bytes per second info", func() {
@@ -357,6 +356,23 @@ var _ = Describe("Client", func() {
 					Expect(message).NotTo(BeNil())
 					Expect(message.GetMetrics()["test-name"].GetValue()).To(Equal(float64(10)))
 					Expect(message.GetMetrics()["test-name"].GetUnit()).To(Equal("B/s"))
+				})
+
+				It("increments counter", func() {
+					Consistently(func() error {
+						return client.IncrementCounter("test-name")
+					}).Should(Succeed())
+					var recv loggregator_v2.Ingress_SenderServer
+					Eventually(receivers).Should(Receive(&recv))
+					env, err := recv.Recv()
+					Expect(err).NotTo(HaveOccurred())
+
+					ts := time.Unix(0, env.GetTimestamp())
+					Expect(ts).Should(BeTemporally("~", time.Now(), time.Second))
+					message := env.GetCounter()
+					Expect(message).NotTo(BeNil())
+					Expect(message.GetName()).To(Equal("test-name"))
+					Expect(message.GetDelta()).To(Equal(uint64(1)))
 				})
 			})
 

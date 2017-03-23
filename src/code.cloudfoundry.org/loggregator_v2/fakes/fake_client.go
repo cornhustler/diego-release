@@ -40,6 +40,14 @@ type FakeClient struct {
 	sendAppMetricsReturns struct {
 		result1 error
 	}
+	IncrementCounterStub        func(name string) error
+	incrementCounterMutex       sync.RWMutex
+	incrementCounterArgsForCall []struct {
+		name string
+	}
+	incrementCounterReturns struct {
+		result1 error
+	}
 	SendDurationStub        func(name string, value time.Duration) error
 	sendDurationMutex       sync.RWMutex
 	sendDurationArgsForCall []struct {
@@ -190,6 +198,39 @@ func (fake *FakeClient) SendAppMetricsArgsForCall(i int) *events.ContainerMetric
 func (fake *FakeClient) SendAppMetricsReturns(result1 error) {
 	fake.SendAppMetricsStub = nil
 	fake.sendAppMetricsReturns = struct {
+		result1 error
+	}{result1}
+}
+
+func (fake *FakeClient) IncrementCounter(name string) error {
+	fake.incrementCounterMutex.Lock()
+	fake.incrementCounterArgsForCall = append(fake.incrementCounterArgsForCall, struct {
+		name string
+	}{name})
+	fake.recordInvocation("IncrementCounter", []interface{}{name})
+	fake.incrementCounterMutex.Unlock()
+	if fake.IncrementCounterStub != nil {
+		return fake.IncrementCounterStub(name)
+	} else {
+		return fake.incrementCounterReturns.result1
+	}
+}
+
+func (fake *FakeClient) IncrementCounterCallCount() int {
+	fake.incrementCounterMutex.RLock()
+	defer fake.incrementCounterMutex.RUnlock()
+	return len(fake.incrementCounterArgsForCall)
+}
+
+func (fake *FakeClient) IncrementCounterArgsForCall(i int) string {
+	fake.incrementCounterMutex.RLock()
+	defer fake.incrementCounterMutex.RUnlock()
+	return fake.incrementCounterArgsForCall[i].name
+}
+
+func (fake *FakeClient) IncrementCounterReturns(result1 error) {
+	fake.IncrementCounterStub = nil
+	fake.incrementCounterReturns = struct {
 		result1 error
 	}{result1}
 }
@@ -373,6 +414,8 @@ func (fake *FakeClient) Invocations() map[string][][]interface{} {
 	defer fake.sendAppErrorLogMutex.RUnlock()
 	fake.sendAppMetricsMutex.RLock()
 	defer fake.sendAppMetricsMutex.RUnlock()
+	fake.incrementCounterMutex.RLock()
+	defer fake.incrementCounterMutex.RUnlock()
 	fake.sendDurationMutex.RLock()
 	defer fake.sendDurationMutex.RUnlock()
 	fake.sendMebiBytesMutex.RLock()
